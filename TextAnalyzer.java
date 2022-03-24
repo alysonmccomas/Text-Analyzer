@@ -1,23 +1,27 @@
+package application;
+
 import java.io.*;
 import java.net.URL;
 import java.util.*;
 
 public class TextAnalyzer {
+	
+	public static List<String> AllLines = new ArrayList<String>();
+	public static List<String> cleanLines = new ArrayList<String>();
+	public static List<String> lines = new ArrayList<String>();
+	public static List<String> wordList = new ArrayList<String>();
+	public static List<String> noDuplicates = new ArrayList<String>();
 
-	public static void main(String[] args) throws IOException {
+	public static List<String> textAnalyzer(List<String> userInput) throws IOException{
 		
 		//read text from url
-		URL url = new URL("https://www.gutenberg.org/files/1065/1065-h/1065-h.htm");
+		URL url = new URL(userInput.get(0));
 		BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
 		
 		//declare variables
-		List<String> AllLines = new ArrayList<String>();
-		List<String> cleanLines = new ArrayList<String>();
-		List<String> lines = new ArrayList<String>();
-		List<String> wordList = new ArrayList<String>();
-		List<String> noDuplicates = new ArrayList<String>();
-		String firstLine = "by Edgar Allan Poe";
-		String endLine = "*** END OF THE PROJECT GUTENBERG EBOOK THE RAVEN ***";
+
+		String firstLine = userInput.get(1);
+		String endLine = userInput.get(2);
 		firstLine = firstLine.toLowerCase();
 		endLine = endLine.toLowerCase();
 		
@@ -31,12 +35,14 @@ public class TextAnalyzer {
 		//Remove html characters
 		for (int i = 0; i < AllLines.size(); i++) {
 			String line =  AllLines.get(i).toLowerCase();
-			String cleanLine1 = line.replaceAll("\\<.*?\\>", "");
-			String cleanLine2 = cleanLine1.replaceAll("[â€œ™!?.;”]", "");
-			String cleanLine3 = cleanLine2.replaceAll("&mdash", " ");
-			String cleanLine4 = cleanLine3.replaceAll(",", "");
-			String cleanLine5 = cleanLine4.replaceAll("\"", "");
-			String cleanLine = cleanLine5.replace("\n", "").replace("\r", "");
+			String cL1 = line.replaceAll("\\<.*?\\>", "");
+			String cL2 = cL1.replaceAll("[â€œ™!?.,-;]", "");
+			String cL3 = cL2.replaceAll("&mdash", " ");
+			String cL4 = cL3.replaceAll("&mdash;", " ");
+			String cL5 = cL4.replaceAll("[\\;,]", "");
+			String cL6 = cL5.replaceAll("\"", "");
+			String cleanLine = cL6.replace("\n", "").replace("\r", "");
+			
 			cleanLines.add(cleanLine);
 			}
 		   
@@ -52,6 +58,15 @@ public class TextAnalyzer {
 			  for (String a : strSplit)
 				 wordList.add(a);	  
 		  }
+		  for (int i = 0; i < wordList.size(); i++) {
+			  if(wordList.get(i).matches("[a-z]") == true) {
+				  
+			  }else{
+				  String noChar = wordList.get(i).replaceAll("[^a-z]", "");
+				  wordList.remove(i);
+				  wordList.add(noChar);
+			  }
+		  }
 		  
 		  //sort words in order of descending frequency
 		  int n = wordList.size();
@@ -59,7 +74,6 @@ public class TextAnalyzer {
 	        for (int i = 0; i < n - 1; i++) {
 	            for (int j = 0; j < n - i - 1; j++)
 	                if (Collections.frequency(wordList, wordList.get(j)) < Collections.frequency(wordList, wordList.get(j + 1))) {
-	                    // swap arr[j+1] and arr[j]
 	                	temp = wordList.get(j);
 	                    wordList.set(j, wordList.get(j + 1));
 	                    wordList.set((j + 1),temp);
@@ -74,16 +88,31 @@ public class TextAnalyzer {
 				noDuplicates.add(currentWord);
 			}
 		  }
-		   
-		  //Print results to console
-		  System.out.println(" Word Frequency");
-		  System.out.println("-----------------");
-		  for (int i = 1; i <= 20; i++) {
-			  System.out.println(i  + ". " + noDuplicates.get(i) + " " + Collections.frequency(wordList, noDuplicates.get(i))+ " ");
-		  }
+		  return noDuplicates;
 	}
-	   
+	public static List<String> outputResults() {
+		List<String> list = new ArrayList<String>();
+		String word;
+		int count;
+		String wordCount;
+		
+	for (int i = 1; i < 10; i++) {
+		word = noDuplicates.get(i);
+		count = Collections.frequency(wordList, noDuplicates.get(i));
+		wordCount = " " + word + " " + String.valueOf(count);
+		list.add(wordCount);}
+	for (int i = 10; i <= 20; i++) {
+		word = noDuplicates.get(i);
+		count = Collections.frequency(wordList, noDuplicates.get(i));
+		wordCount = word + " " + String.valueOf(count);
+		list.add(wordCount);
+	  	}
+	return list;
+	}
+
 }
+
+
 
 	
 	
