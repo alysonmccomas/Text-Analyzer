@@ -1,119 +1,94 @@
 package application;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 
 public class TextAnalyzer {
 	
-	public static List<String> AllLines = new ArrayList<String>();
-	public static List<String> cleanLines = new ArrayList<String>();
-	public static List<String> lines = new ArrayList<String>();
-	public static List<String> wordList = new ArrayList<String>();
-	public static List<String> noDuplicates = new ArrayList<String>();
+	public static List<String> userText = new ArrayList<String>();
+	public static List<String> outputList = new ArrayList<String>();
 
-	public static List<String> textAnalyzer(List<String> userInput) throws IOException{
-		
-		//read text from url
-		URL url = new URL(userInput.get(0));
-		BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+	//read text from url
+	public static List<String> textAnalyzer(List<String> userInput) throws IOException {
+		userText.clear();
+		outputList.clear();
 		
 		//declare variables
+		Document document;
+		int firstLineIndex = 0;
+		//List<String> lines = new ArrayList<String>();
+		List<String> userText = new ArrayList<String>();
+		
+		String firstLine = userInput.get(1).toLowerCase();
+		String endLine = userInput.get(2).toLowerCase();
+		
+		//parse html
+		document = Jsoup.connect(userInput.get(0)).get();
+		
 
-		String firstLine = userInput.get(1);
-		String endLine = userInput.get(2);
-		firstLine = firstLine.toLowerCase();
-		endLine = endLine.toLowerCase();
 		
-		//Read File
-		String text = reader.readLine();
-		while (text != null) {
-		 AllLines.add(text);
-		 text = reader.readLine();
-		 }
+		String str = document.toString();
 		
-		//Remove html characters
-		for (int i = 0; i < AllLines.size(); i++) {
-			String line =  AllLines.get(i).toLowerCase();
-			String cL1 = line.replaceAll("\\<.*?\\>", "");
-			String cL2 = cL1.replaceAll("[â€œ™!?.,-;]", "");
-			String cL3 = cL2.replaceAll("&mdash", " ");
-			String cL4 = cL3.replaceAll("&mdash;", " ");
-			String cL5 = cL4.replaceAll("[\\;,]", "");
-			String cL6 = cL5.replaceAll("\"", "");
-			String cleanLine = cL6.replace("\n", "").replace("\r", "");
-			
-			cleanLines.add(cleanLine);
+		//clean up html tags
+		str = str.replaceAll("<br>", "\n");
+		
+		String[] strSplit = str.split("\n");
+		List<String> strList = new ArrayList<String>(Arrays.asList(strSplit));
+		
+		for (int i = 0; i < strList.size(); i++) {
+			String string = strList.get(i);
+			string = string.replaceAll("\\<.*?\\>", "").replaceAll("—"," ").replaceAll("[^a-zA-Z ]", "").toLowerCase();
+			strList.set(i, string);
+		}
+		
+		//Index of first line
+		for(int i = 0; i < strList.size(); i++) {
+			if (strList.get(i).contains(firstLine) == true) {
+				firstLineIndex = i;
 			}
-		   
-		   //Isolate desired lines of text
-		   for (int i = (cleanLines.indexOf(firstLine)); i < cleanLines.indexOf(endLine); i++) {
-				   lines.add(cleanLines.get(i));
-			   }
-		   
-		   //split lines into words
-		  for (int i = 0; i < lines.size(); i++) {
-			  String str = lines.get(i);
-			  String[] strSplit = str.split(" ");
-			  for (String a : strSplit)
-				 wordList.add(a);	  
-		  }
-		  for (int i = 0; i < wordList.size(); i++) {
-			  if(wordList.get(i).matches("[a-z]") == true) {
-				  
-			  }else{
-				  String noChar = wordList.get(i).replaceAll("[^a-z]", "");
-				  wordList.remove(i);
-				  wordList.add(noChar);
-			  }
-		  }
-		  
-		  //sort words in order of descending frequency
-		  int n = wordList.size();
-		  String temp;
-	        for (int i = 0; i < n - 1; i++) {
-	            for (int j = 0; j < n - i - 1; j++)
-	                if (Collections.frequency(wordList, wordList.get(j)) < Collections.frequency(wordList, wordList.get(j + 1))) {
-	                	temp = wordList.get(j);
-	                    wordList.set(j, wordList.get(j + 1));
-	                    wordList.set((j + 1),temp);
-	                }	
-	        }
-		  
-	      //remove duplicates from output list
-		  for (int m = 0; m < wordList.size(); m++){
-				String currentWord = wordList.get(m);
-				boolean checkDuplicates = noDuplicates.contains(currentWord);
-			if (checkDuplicates == false ){
-				noDuplicates.add(currentWord);
+		}
+		
+		for (int i = firstLineIndex; i < strList.size(); i++) {
+			//System.out.println(strList.get(i));
+			userText.add(strList.get(i));
+			 if (strList.get(i).contains(endLine) == true) {
+				break;
 			}
-		  }
-		  return noDuplicates;
+		}
+
+		List<String> wordList = new ArrayList<String>();
+		for (int i = 0; i < userText.size(); i++) {
+			String next = userText.get(i);
+			String[] splitString = next.split(" ");
+			for (String a : splitString)
+				wordList.add(a.replaceAll(" ", ""));
+		}
+		
+		Map<String,Integer> counter = new HashMap<String,Integer>();
+		for (String list : wordList)
+			counter.put(list, 1 + (counter.containsKey(list) ? counter.get(list) : 0));
+		List<String> arrayList = new ArrayList<String>(counter.keySet());
+		Collections.sort(arrayList, new Comparator<String>() {
+			@Override
+			public int compare(String x, String y) {
+				return counter.get(y) - counter.get(x);
+			}
+		});
+		
+		for (int i = 1; i < 21; i++) {
+			//System.out.println(Collections.frequency(wordList, arrayList.get(i)) + " " + arrayList.get(i));
+			String frequency = Collections.frequency(wordList, arrayList.get(i)) + " " + arrayList.get(i);
+			outputList.add(frequency);
+		}
+		return outputList;
 	}
+	
 	public static List<String> outputResults() {
-		List<String> list = new ArrayList<String>();
-		String word;
-		int count;
-		String wordCount;
-		
-	for (int i = 1; i < 10; i++) {
-		word = noDuplicates.get(i);
-		count = Collections.frequency(wordList, noDuplicates.get(i));
-		wordCount = " " + word + " " + String.valueOf(count);
-		list.add(wordCount);}
-	for (int i = 10; i <= 20; i++) {
-		word = noDuplicates.get(i);
-		count = Collections.frequency(wordList, noDuplicates.get(i));
-		wordCount = word + " " + String.valueOf(count);
-		list.add(wordCount);
-	  	}
-	return list;
-	}
+		return outputList;
+		}
 
 }
-
-
-
-	
-	
 

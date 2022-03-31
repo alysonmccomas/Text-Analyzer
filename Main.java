@@ -43,6 +43,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		
 		textArea = new TextArea();
 		textArea.setEditable(false);
+		textArea.setPrefHeight(375);
 		
 		//create a tile pane
 		VBox vbox = new VBox();
@@ -62,6 +63,8 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 	
 	@Override
 	public void handle(ActionEvent event) {
+		userInput.clear();
+		textArea.setText("");
 		userInput.add(enterURL.getText());
 		userInput.add(startLine.getText());
 		userInput.add(endLine.getText());
@@ -75,8 +78,9 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		list = TextAnalyzer.outputResults();
 		
 		
-        for (int i = 1; i <= 20; i++) {
-        	textArea.appendText(String.valueOf(i) + ". " + list.get(i-1) + "\n");
+        for (int i = 0; i < 20; i++) {
+        	textArea.appendText(list.get(i) + "\n");
+        	//System.out.println(TextAnalyzer1.wordCounter().get(i) + "\n");
         }
         
 	}
