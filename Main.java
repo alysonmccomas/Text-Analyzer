@@ -1,6 +1,11 @@
 package application;
 	
 import java.io.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 import javafx.application.Application;
@@ -12,8 +17,10 @@ import javafx.scene.layout.*;
 import javafx.geometry.*;
 
 
-public class Main extends Application implements EventHandler<ActionEvent> {
-		
+public class Main extends Application {
+	
+	//Variables
+	private Connection connection;
 	public Button button;
 	public TextField enterURL;
 	public TextField startLine;
@@ -24,13 +31,14 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 	public List<String> result = new ArrayList<String>();
 	public List<String> list = new ArrayList<String>();
 
-	
+	//Construct GUI
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		primaryStage.setTitle("Word Occurences");
 		
 		button = new Button("Submit");
-		button.setOnAction(this);
+		button.setOnAction(buttonHandler);
+		
 		
 		//create a text field
 		enterURL = new TextField();
@@ -61,6 +69,8 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		primaryStage.show();
 	}
 	
+	//Button Click!!
+	EventHandler<ActionEvent> buttonHandler = new EventHandler<ActionEvent>() {
 	@Override
 	public void handle(ActionEvent event) {
 		userInput.clear();
@@ -69,21 +79,33 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		userInput.add(startLine.getText());
 		userInput.add(endLine.getText());
 		try {
-			result = TextAnalyzer.textAnalyzer(userInput);
+			TextAnalyzer.textAnalyzer(userInput);
 		} catch (IOException e) {
 			e.printStackTrace();
 			textArea.setText("Please enter a valid URL");
 		}
 		
-		list = TextAnalyzer.outputResults();
-		
-		
-        for (int i = 0; i < 20; i++) {
-        	textArea.appendText(list.get(i) + "\n");
-        	//System.out.println(TextAnalyzer1.wordCounter().get(i) + "\n");
-        }
-        
+		try {
+			ResultSet results = null;
+			try {
+				Class.forName("com.mysql.cj.jdbc.Driver");
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/wordOccurences",
+					"root","password");
+			Statement statement = connection.createStatement();
+			ResultSet resultSet = statement.executeQuery("SELECT word, COUNT(*) FROM word GROUP BY word ORDER BY COUNT(*) DESC LIMIT 20;");
+			while(resultSet.next()) {
+
+				textArea.appendText(resultSet.getString(1) + "...." + resultSet.getString(2) + "\n");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
+	};
+
 	
 	public static void main(String[] args) {
 		launch(args);

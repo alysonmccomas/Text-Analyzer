@@ -1,7 +1,14 @@
+//https://www.gutenberg.org/files/1065/1065-h/1065-h.htm
+//once upon a midnight dreary while i pondered weak and weary
+//shall be lifted nevermore
+
 package application;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -12,14 +19,13 @@ public class TextAnalyzer {
 	public static List<String> outputList = new ArrayList<String>();
 
 	//read text from url
-	public static List<String> textAnalyzer(List<String> userInput) throws IOException {
+	public static void textAnalyzer(List<String> userInput) throws IOException {
 		userText.clear();
-		outputList.clear();
+		//outputList.clear();
 		
 		//declare variables
 		Document document;
 		int firstLineIndex = 0;
-		//List<String> lines = new ArrayList<String>();
 		List<String> userText = new ArrayList<String>();
 		
 		String firstLine = userInput.get(1).toLowerCase();
@@ -27,9 +33,6 @@ public class TextAnalyzer {
 		
 		//parse html
 		document = Jsoup.connect(userInput.get(0)).get();
-		
-
-		
 		String str = document.toString();
 		
 		//clean up html tags
@@ -51,6 +54,7 @@ public class TextAnalyzer {
 			}
 		}
 		
+		//isolate desired text
 		for (int i = firstLineIndex; i < strList.size(); i++) {
 			//System.out.println(strList.get(i));
 			userText.add(strList.get(i));
@@ -59,36 +63,40 @@ public class TextAnalyzer {
 			}
 		}
 
+		//split text into individual words
 		List<String> wordList = new ArrayList<String>();
 		for (int i = 0; i < userText.size(); i++) {
 			String next = userText.get(i);
 			String[] splitString = next.split(" ");
-			for (String a : splitString)
-				wordList.add(a.replaceAll(" ", ""));
+			String[] removedNull = Arrays.stream(splitString).filter(
+					value -> value != null && value.length() > 0)
+					.toArray(size -> new String[size]);
+			for (String a : removedNull)
+				wordList.add(a);
 		}
-		
-		Map<String,Integer> counter = new HashMap<String,Integer>();
-		for (String list : wordList)
-			counter.put(list, 1 + (counter.containsKey(list) ? counter.get(list) : 0));
-		List<String> arrayList = new ArrayList<String>(counter.keySet());
-		Collections.sort(arrayList, new Comparator<String>() {
-			@Override
-			public int compare(String x, String y) {
-				return counter.get(y) - counter.get(x);
-			}
-		});
-		
-		for (int i = 1; i < 21; i++) {
-			//System.out.println(Collections.frequency(wordList, arrayList.get(i)) + " " + arrayList.get(i));
-			String frequency = Collections.frequency(wordList, arrayList.get(i)) + " " + arrayList.get(i);
-			outputList.add(frequency);
-		}
-		return outputList;
-	}
 	
-	public static List<String> outputResults() {
-		return outputList;
-		}
-
+		//add words to database
+		Connection connection;
+		try {
+			ResultSet results = null;
+			try {
+				Class.forName("com.mysql.cj.jdbc.Driver");
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/wordOccurences",
+					"root","password");
+			Statement statement = connection.createStatement();
+			int rowsAffected = statement.executeUpdate("DELETE FROM word");
+			for (int i = 0; i < wordList.size(); ++i) {
+				String sql = "INSERT INTO word (word) VALUES ('" + wordList.get(i) + "')";
+				//ResultSet resultSet = statement.executeQuery(sql);
+				statement.executeUpdate(sql);
+				}
+			
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	};
 }
 
