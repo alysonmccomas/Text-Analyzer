@@ -19,7 +19,7 @@ import javafx.geometry.*;
 
 public class Main extends Application {
 	
-	//Variables
+	/**Declare Variables*/
 	private Connection connection;
 	public Button button;
 	public TextField enterURL;
@@ -31,7 +31,7 @@ public class Main extends Application {
 	public List<String> result = new ArrayList<String>();
 	public List<String> list = new ArrayList<String>();
 
-	//Construct GUI
+	/**Construct GUI*/
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		primaryStage.setTitle("Word Occurences");
@@ -40,7 +40,7 @@ public class Main extends Application {
 		button.setOnAction(buttonHandler);
 		
 		
-		//create a text field
+		/**create a text field*/
 		enterURL = new TextField();
 		startLine = new TextField();
 		endLine = new TextField();
@@ -53,23 +53,23 @@ public class Main extends Application {
 		textArea.setEditable(false);
 		textArea.setPrefHeight(375);
 		
-		//create a tile pane
+		/**create a tile pane*/
 		VBox vbox = new VBox();
 		vbox.setPadding(new Insets(10,20,20,20));
 		vbox.setSpacing(5);
 		
-		//add nodes
+		/**add nodes*/
 		vbox.getChildren().addAll(l, enterURL, start, startLine, end, endLine, button, textArea);
 
-		//create the scene
+		/**create the scene*/
 		Scene scene = new Scene(vbox);
 		
-		//set the scene
+		/**set the scene*/
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
 	
-	//Button Click!!
+	/**Button Click!!*/
 	EventHandler<ActionEvent> buttonHandler = new EventHandler<ActionEvent>() {
 	@Override
 	public void handle(ActionEvent event) {
@@ -85,6 +85,11 @@ public class Main extends Application {
 			textArea.setText("Please enter a valid URL");
 		}
 		
+		/**Connect to database
+		 * Retrieve words
+		 * Count Frequency
+		 * Output top 20 sorted by freqency DESC
+		 */
 		try {
 			ResultSet results = null;
 			try {
@@ -100,13 +105,14 @@ public class Main extends Application {
 
 				textArea.appendText(resultSet.getString(1) + "...." + resultSet.getString(2) + "\n");
 			}
+			System.out.println("Success!!");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	};
 
-	
+	/**Ready, Set, Go*/
 	public static void main(String[] args) {
 		launch(args);
 	}

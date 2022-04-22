@@ -16,26 +16,24 @@ import org.jsoup.nodes.Document;
 public class TextAnalyzer {
 	
 	public static List<String> userText = new ArrayList<String>();
-	public static List<String> outputList = new ArrayList<String>();
 
-	//read text from url
+	/**read text from url*/
 	public static void textAnalyzer(List<String> userInput) throws IOException {
 		userText.clear();
-		//outputList.clear();
 		
-		//declare variables
+		/**declare variables*/
 		Document document;
 		int firstLineIndex = 0;
-		List<String> userText = new ArrayList<String>();
+		//List<String> userText = new ArrayList<String>();
 		
 		String firstLine = userInput.get(1).toLowerCase();
 		String endLine = userInput.get(2).toLowerCase();
 		
-		//parse html
+		/**parse html*/
 		document = Jsoup.connect(userInput.get(0)).get();
 		String str = document.toString();
 		
-		//clean up html tags
+		/**clean up html tags*/
 		str = str.replaceAll("<br>", "\n");
 		
 		String[] strSplit = str.split("\n");
@@ -47,14 +45,14 @@ public class TextAnalyzer {
 			strList.set(i, string);
 		}
 		
-		//Index of first line
+		/**Index of first line*/
 		for(int i = 0; i < strList.size(); i++) {
 			if (strList.get(i).contains(firstLine) == true) {
 				firstLineIndex = i;
 			}
 		}
 		
-		//isolate desired text
+		/**isolate desired text*/
 		for (int i = firstLineIndex; i < strList.size(); i++) {
 			//System.out.println(strList.get(i));
 			userText.add(strList.get(i));
@@ -63,7 +61,7 @@ public class TextAnalyzer {
 			}
 		}
 
-		//split text into individual words
+		/**split text into individual words*/
 		List<String> wordList = new ArrayList<String>();
 		for (int i = 0; i < userText.size(); i++) {
 			String next = userText.get(i);
@@ -75,7 +73,7 @@ public class TextAnalyzer {
 				wordList.add(a);
 		}
 	
-		//add words to database
+		/**add words to database*/
 		Connection connection;
 		try {
 			ResultSet results = null;
@@ -90,7 +88,6 @@ public class TextAnalyzer {
 			int rowsAffected = statement.executeUpdate("DELETE FROM word");
 			for (int i = 0; i < wordList.size(); ++i) {
 				String sql = "INSERT INTO word (word) VALUES ('" + wordList.get(i) + "')";
-				//ResultSet resultSet = statement.executeQuery(sql);
 				statement.executeUpdate(sql);
 				}
 			
