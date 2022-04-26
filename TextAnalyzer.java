@@ -14,11 +14,11 @@ import org.jsoup.nodes.Document;
 
 
 public class TextAnalyzer {
-	
+	public static List<String> wordList = new ArrayList<String>();
 	public static List<String> userText = new ArrayList<String>();
 
 	/**read text from url*/
-	public static void textAnalyzer(List<String> userInput) throws IOException {
+	public static List<String> textAnalyzer(List<String> userInput) throws IOException {
 		userText.clear();
 		
 		/**declare variables*/
@@ -62,7 +62,7 @@ public class TextAnalyzer {
 		}
 
 		/**split text into individual words*/
-		List<String> wordList = new ArrayList<String>();
+		
 		for (int i = 0; i < userText.size(); i++) {
 			String next = userText.get(i);
 			String[] splitString = next.split(" ");
@@ -72,8 +72,12 @@ public class TextAnalyzer {
 			for (String a : removedNull)
 				wordList.add(a);
 		}
+		return wordList;
+	}
 	
+	public void textDatabase(List<String> wordList) {
 		/**add words to database*/
+		
 		Connection connection;
 		try {
 			ResultSet results = null;

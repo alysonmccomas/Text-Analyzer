@@ -1,12 +1,8 @@
 package application;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.*;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.*;
 import org.junit.jupiter.api.Test;
 
 class TextAnalyzerTest {
@@ -18,9 +14,8 @@ class TextAnalyzerTest {
 		input.add("once upon a midnight dreary while i pondered weak and weary");
 		input.add("shall be lifted nevermore");
 		
-		TextAnalyzer test = new TextAnalyzer();
-		List<String> list1 = test.textAnalyzer(input);
-		List<String> list2 = test.textAnalyzer(input);
+		List<String> list1 = TextAnalyzer.textAnalyzer(input);
+		List<String> list2 = TextAnalyzer.textAnalyzer(input);
 		assertArrayEquals(list1.toArray(), list2.toArray());
 	}
 

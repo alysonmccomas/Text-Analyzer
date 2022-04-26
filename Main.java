@@ -78,8 +78,9 @@ public class Main extends Application {
 		userInput.add(enterURL.getText());
 		userInput.add(startLine.getText());
 		userInput.add(endLine.getText());
+		TextAnalyzer tA = new TextAnalyzer();
 		try {
-			TextAnalyzer.textAnalyzer(userInput);
+			tA.textDatabase(TextAnalyzer.textAnalyzer(userInput));
 		} catch (IOException e) {
 			e.printStackTrace();
 			textArea.setText("Please enter a valid URL");
